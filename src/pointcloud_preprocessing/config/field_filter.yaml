@@ -1,0 +1,22 @@
+field_filter_node:
+  ros__parameters:
+    input_topic: /livox/lidar
+    output_topic: /radar/points_filtered
+    input_frame: livox_frame
+    field:
+      # 单位：米。以下为占位值，部署前请填写实测场地尺寸。
+      # 场地对齐坐标系：原点为雷达光学原点，X 沿长度，Y 沿宽度，Z 向上。
+      length_m: 10.0
+      width_m: 10.0
+      # 矩形范围 [min_x, min_x + length] × [min_y, min_y + width]，包含边界。
+      # 默认雷达位于场地短边中点；如果在角点，可设 min_x=min_y=0。
+      min_x_m: 0.0
+      min_y_m: -5.0
+    mounting:
+      # 单位：度，右手定则。p_field = Rz(yaw) * Ry(pitch) * Rx(roll) * p_lidar。
+      # 尚未测量，默认不旋转。绕自身 X 轴倒置可填 roll=180；
+      # 在此约定下，X 轴朝场地且向下俯倾 15 度的示例：roll=180, pitch=15, yaw=0。
+      # 示例不是实测值，请根据真实安装方向填写，避免重复补偿驱动中的外参。
+      roll_deg: 0.0
+      pitch_deg: 0.0
+      yaw_deg: 0.0
