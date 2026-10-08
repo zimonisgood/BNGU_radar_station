@@ -1,0 +1,8 @@
+find_path(TENSORRT_INCLUDE_DIR NvInfer.h HINTS $ENV{TENSORRT_ROOT} ${TENSORRT_ROOT} /usr /usr/local PATH_SUFFIXES include)
+find_library(TENSORRT_LIB nvinfer HINTS $ENV{TENSORRT_ROOT} ${TENSORRT_ROOT} /usr /usr/local PATH_SUFFIXES lib lib64)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(TensorRT REQUIRED_VARS TENSORRT_INCLUDE_DIR TENSORRT_LIB)
+if(TensorRT_FOUND)
+  set(TENSORRT_INCLUDE_DIRS ${TENSORRT_INCLUDE_DIR})
+  set(TENSORRT_LIBRARIES ${TENSORRT_LIB})
+endif()

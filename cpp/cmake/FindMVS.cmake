@@ -1,0 +1,8 @@
+find_path(MVS_INCLUDE_DIR MvCameraControl.h HINTS $ENV{MVS_ROOT} /opt/MVS PATH_SUFFIXES include)
+find_library(MVS_LIB MvCameraControl HINTS $ENV{MVS_ROOT} /opt/MVS PATH_SUFFIXES lib/64 lib)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(MVS REQUIRED_VARS MVS_INCLUDE_DIR MVS_LIB)
+if(MVS_FOUND)
+  set(MVS_INCLUDE_DIRS ${MVS_INCLUDE_DIR})
+  set(MVS_LIBRARIES ${MVS_LIB})
+endif()

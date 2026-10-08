@@ -1,0 +1,57 @@
+global:
+  state: 'B'
+  camera_mode: 'hik'
+  multi_car_recognition: true
+  infer_backend: 'opencv_dnn'
+  show_ui: true
+  map_size: [2800, 1500]
+  test:
+    image_path: 'images/test_image.jpg'
+    video_path: ''
+    loop: false
+    playback_speed: 1.0
+
+camera_params:
+  exposure_time: 16000.0
+  gain: 17.9
+  device_serial: ''
+
+detection:
+  car:
+    conf_thres: 0.1
+    iou_thres: 0.5
+    max_det: 14
+    img_size: 640
+  armor:
+    conf_thres: 0.50
+    iou_thres: 0.2
+    max_det: 10
+    img_size: 640
+  canvas_size: [640, 640]
+  canvas_padding: 10
+
+paths:
+  project_root: '..'
+  calibration:
+    red: 'arrays_test_red.npy'
+    blue: 'arrays_test_blue.npy'
+    red_yaml: 'cpp/configs/calib_red.yaml'
+    blue_yaml: 'cpp/configs/calib_blue.yaml'
+  map_images:
+    red: 'images-2026/red.jpg'
+    blue: 'images-2026/blue.jpg'
+    mask: 'images-2026/map_mask26.jpg'
+    backup: 'images-2026/image_2026.jpg'
+  models:
+    car_engine: 'models/car.engine'
+    armor_engine: 'models/armor.engine'
+    car_onnx: 'models/car_fp32.onnx'
+    armor_onnx: 'models/armor_fp32.onnx'
+  class_names:
+    car: 'yaml/car.yaml'
+    armor: 'yaml/armor.yaml'
+
+bench:
+  warmup_frames: 2
+  measure_frames: 5
+  report_path: 'cpp/tools/bench_report.md'
