@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5...3.13)
-project(roi)
+project(preprocess)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
@@ -23,17 +23,26 @@ find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common filters)
 
-add_executable(roi_node src/roi_node.cpp)
-target_include_directories(roi_node SYSTEM PRIVATE ${PCL_INCLUDE_DIRS})
-target_compile_options(roi_node PRIVATE ${PCL_DEFINITIONS})
-target_link_libraries(roi_node ${PCL_LIBRARIES})
-ament_target_dependencies(roi_node
-  rclcpp
-  sensor_msgs
-  pcl_conversions
+# 预处理流水线各节点(多节点架构:每个功能一个独立可执行文件)
+set(preprocess_nodes
+  roi_node                 # ROI 立方体裁剪
+  invalid_removal_node     # 无效点(NaN/Inf)去除
+  statistical_outlier_node # 统计离群点去除
 )
 
-install(TARGETS roi_node
+foreach(node ${preprocess_nodes})
+  add_executable(${node} src/${node}.cpp)
+  target_include_directories(${node} SYSTEM PRIVATE ${PCL_INCLUDE_DIRS})
+  target_compile_options(${node} PRIVATE ${PCL_DEFINITIONS})
+  target_link_libraries(${node} ${PCL_LIBRARIES})
+  ament_target_dependencies(${node}
+    rclcpp
+    sensor_msgs
+    pcl_conversions
+  )
+endforeach()
+
+install(TARGETS ${preprocess_nodes}
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch config

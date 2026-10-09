@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>roi</name>
+  <name>preprocess</name>
   <version>0.1.0</version>
-  <description>Livox MID-70 实时点云 ROI(感兴趣区域)裁剪节点</description>
+  <description>Livox MID-70 实时点云预处理功能包(ROI 裁剪 / 无效点去除 / 统计离群点去除,多节点流水线)</description>
   <maintainer email="bngu@todo.todo">bngu</maintainer>
   <license>MIT</license>
 

@@ -31,7 +31,7 @@ public:
   {
     // ---- 可配置参数(边界单位均为:米)----
     input_topic_  = this->declare_parameter<std::string>("input_topic", "/livox/lidar");
-    output_topic_ = this->declare_parameter<std::string>("output_topic", "/livox/lidar/roi");
+    output_topic_ = this->declare_parameter<std::string>("output_topic", "/preprocess/roi");
 
     x_min_ = this->declare_parameter<double>("x_min", -10.0);
     x_max_ = this->declare_parameter<double>("x_max",  10.0);

@@ -56,7 +56,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /livox/lidar/roi
+        Value: /preprocess/roi
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
