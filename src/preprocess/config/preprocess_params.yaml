@@ -8,12 +8,12 @@ roi_filter:
     output_topic: "/preprocess/roi"   # 裁剪后输出
 
     # ROI 立方体边界,单位:米(请按实际赛场/场景修改)
-    x_min: -2.0
-    x_max: 2.0
-    y_min: -1.0
-    y_max: 1.0
-    z_min: -0.5
-    z_max: 0.5
+    x_min: -20.0
+    x_max: 20.0
+    y_min: -20.0
+    y_max: 20.0
+    z_min: -3.0
+    z_max: 3.0
 
     # false: 保留盒子内的点;true: 保留盒子外的点(反选)
     negative: false
@@ -30,6 +30,6 @@ statistical_outlier:
     input_topic: "/preprocess/valid"
     output_topic: "/preprocess/output"
 
-    mean_k: 20              # 估计平均距离所用的邻居点个数
-    stddev_mul_thresh: 1.0  # 标准差倍数阈值,越小越严格
+    mean_k: 10             # 估计平均距离所用的邻居点个数
+    stddev_mul_thresh: 2.0  # 标准差倍数阈值,越小越严格
     negative: false         # true 时仅保留离群点(调试用)

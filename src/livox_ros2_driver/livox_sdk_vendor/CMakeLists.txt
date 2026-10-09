@@ -37,6 +37,11 @@ macro(build_livox_sdk)
     CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/livox-sdk_install
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      # Upstream SDK uses cmake_minimum_required(VERSION < 3.5), which triggers
+      # CMake deprecation warnings. Silence them since we cannot patch the
+      # downloaded sources.
+      -Wno-deprecated
+      -DCMAKE_WARN_DEPRECATED=OFF
       ${extra_cmake_args}
   )
 

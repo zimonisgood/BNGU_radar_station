@@ -32,6 +32,11 @@ endif()
 if(POLICY CMP0144)
   cmake_policy(SET CMP0144 NEW)
 endif()
+# PCL's bundled find modules (e.g. FindFLANN.cmake) reset the policy version
+# via cmake_policy(VERSION ...), which makes CMP0074/CMP0144 "unset" again and
+# triggers <PKG>_ROOT dev warnings. Propagate NEW defaults into those modules.
+set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0144 NEW)
 
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
