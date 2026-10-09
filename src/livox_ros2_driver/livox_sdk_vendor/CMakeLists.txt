@@ -1,6 +1,13 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.5...3.13)
 
 project(livox_sdk_vendor)
+
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+if(POLICY CMP0144)
+  cmake_policy(SET CMP0144 NEW)
+endif()
 
 find_package(ament_cmake REQUIRED)
 
@@ -13,7 +20,7 @@ macro(build_livox_sdk)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
      CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
     list(APPEND extra_cmake_args
-      "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -Wno-error=c++20-compat")
+      "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -Wno-c++20-compat")
   endif()
 
   get_property(multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

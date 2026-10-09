@@ -1,0 +1,16 @@
+roi_filter:
+  ros__parameters:
+    # 输入/输出话题
+    input_topic: "/livox/lidar"      # livox_ros2_driver 发布的点云话题
+    output_topic: "/livox/lidar/roi" # 裁剪后输出的点云话题
+
+    # ROI 立方体边界,单位:米(请按实际赛场/场景修改)
+    x_min: -2.0
+    x_max: 2.0
+    y_min: -1.0
+    y_max: 1.0
+    z_min: -0.5
+    z_max: 0.5
+
+    # false: 保留盒子内的点;true: 保留盒子外的点(反选)
+    negative: false
