@@ -1,0 +1,35 @@
+# 点云预处理流水线参数(多节点)
+# 数据流: /livox/lidar -> roi_filter -> invalid_removal -> statistical_outlier -> /preprocess/output
+
+# 1) ROI 立方体裁剪
+roi_filter:
+  ros__parameters:
+    input_topic: "/livox/lidar"       # livox_ros2_driver 发布的原始点云
+    output_topic: "/preprocess/roi"   # 裁剪后输出
+
+    # ROI 立方体边界,单位:米(请按实际赛场/场景修改)
+    x_min: -10.0
+    x_max: 10.0
+    y_min: -10.0
+    y_max: 10.0
+    z_min: -1.5
+    z_max: 1.5
+
+    # false: 保留盒子内的点;true: 保留盒子外的点(反选)
+    negative: false
+
+# 2) 无效点(NaN/Inf)去除
+invalid_removal:
+  ros__parameters:
+    input_topic: "/preprocess/roi"
+    output_topic: "/preprocess/valid"
+
+# 3) 统计离群点去除(去噪/飞点)
+statistical_outlier:
+  ros__parameters:
+    input_topic: "/preprocess/valid"
+    output_topic: "/preprocess/output"
+
+    mean_k: 20             # 估计平均距离所用的邻居点个数
+    stddev_mul_thresh: 0.35  # 标准差倍数阈值,越小越严格
+    negative: false         # true 时仅保留离群点(调试用)

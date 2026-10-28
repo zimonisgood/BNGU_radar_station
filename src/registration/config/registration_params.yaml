@@ -1,0 +1,8 @@
+icp:
+  ros__parameters:
+    input_topic: "/preprocess/valid"
+    output_topic: "/registration/icp"
+    stl_file: ""
+
+    max_iterations: 50
+    max_correspondence_distance: 0.5

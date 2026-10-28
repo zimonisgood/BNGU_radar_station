@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>segment</name>
+  <version>0.1.0</version>
+  <description>Livox MID-70 点云分割功能包(欧式聚类,多节点流水线)</description>
+  <maintainer email="bngu@todo.todo">bngu</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>pcl_conversions</depend>
+  <depend>libpcl-all-dev</depend>
+
+  <!-- 总 launch(radar_station.launch.py)运行时需要:预处理流水线与 Livox 驱动 -->
+  <exec_depend>preprocess</exec_depend>
+  <exec_depend>livox_ros2_driver</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

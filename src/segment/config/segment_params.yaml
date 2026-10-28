@@ -1,0 +1,13 @@
+# 点云分割流水线参数(多节点)
+# 数据流: /preprocess/output -> euclidean_cluster -> /segment/clusters
+
+# 欧式聚类
+#    参考: https://pointclouds.org/documentation/tutorials/cluster_extraction.html
+euclidean_cluster:
+  ros__parameters:
+    input_topic: "/preprocess/output"   # 预处理流水线的最终输出
+    output_topic: "/segment/clusters"   # 带聚类标签(intensity)的点云
+
+    cluster_tolerance: 1.0     # 空间距离阈值(米):超过则一定不同类
+    min_cluster_size: 0        # 聚类最小点数,低于此视为噪声丢弃
+    max_cluster_size: 25000    # 聚类最大点数,高于此视为背景丢弃
