@@ -24,13 +24,15 @@ public:
     input_topic_ = this->declare_parameter<std::string>("input_topic", "/preprocess/valid");
     output_topic_ = this->declare_parameter<std::string>("output_topic", "/registration/icp");
     // stl_file_ = this->declare_parameter<std::string>("stl_file", "");
-    target_cloud_ = this->declare_parameter<std::string>("target", "");
+    target_file_ = this->declare_parameter<std::string>("target", "");
 
     max_iterations_ = this->declare_parameter<int>("max_iterations", 50);
     max_correspondence_distance_ = this->declare_parameter<double>("max_correspondence_distance", 0.5);
 
     // 加载STL文件
     // loadTarget(stl_file_);
+    // 加载PCD文件
+    loadPCDFile(target_file_);
 
     // 初始化上一帧为单位矩阵
     prev_transform_ = Eigen::Matrix4f::Identity();
@@ -78,6 +80,11 @@ public:
 
       if (!icp.hasConverged()){
         RCLCPP_WARN(this->get_logger(), "ICP 未收敛，跳过该帧");
+        return;
+      }
+
+      if (icp.hasConverged()){
+        printf("it has been converged.");
         return;
       }
 
