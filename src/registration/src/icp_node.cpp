@@ -23,13 +23,13 @@ public:
     // 声明参数
     input_topic_ = this->declare_parameter<std::string>("input_topic", "/preprocess/valid");
     output_topic_ = this->declare_parameter<std::string>("output_topic", "/registration/icp");
-    stl_file_ = this->declare_parameter<std::string>("stl_file", "");
+    // stl_file_ = this->declare_parameter<std::string>("stl_file", "");
 
     max_iterations_ = this->declare_parameter<int>("max_iterations", 50);
     max_correspondence_distance_ = this->declare_parameter<double>("max_correspondence_distance", 0.5);
 
     // 加载STL文件
-    loadTarget(stl_file_);
+    // loadTarget(stl_file_);
 
     // 初始化上一帧为单位矩阵
     prev_transform_ = Eigen::Matrix4f::Identity();
@@ -44,18 +44,18 @@ public:
   }
 
   private:
-    void loadTarget(const std::string & path){
-      pcl::PolygonMesh mesh;
-      if (pcl::io::loadPolygonFileSTL(path, mesh) < 0){
-        RCLCPP_ERROR(this->get_logger(), "STL 文件加载失败： %s", path.c_str());
-        return;
-      }
+    // void loadTarget(const std::string & path){
+    //   pcl::PolygonMesh mesh;
+    //   if (pcl::io::loadPolygonFileSTL(path, mesh) < 0){
+    //     RCLCPP_ERROR(this->get_logger(), "STL 文件加载失败： %s", path.c_str());
+    //     return;
+    //   }
 
-      target_cloud_.reset(new pcl::PointCloud<pcl::PointXYZ>());
-      pcl::fromPCLPointCloud2(mesh.cloud, *target_cloud_);
+    //   target_cloud_.reset(new pcl::PointCloud<pcl::PointXYZ>());
+    //   pcl::fromPCLPointCloud2(mesh.cloud, *target_cloud_);
 
-      RCLCPP_INFO(this->get_logger(), "STL 加载完成： %zu 个顶点", target_cloud_->size());
-    }
+    //   RCLCPP_INFO(this->get_logger(), "STL 加载完成： %zu 个顶点", target_cloud_->size());
+    // }
 
     void cloudCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr msg){
       pcl::PointCloud<pcl::PointXYZI>::Ptr source_xyzi(new pcl::PointCloud<pcl::PointXYZI>());
