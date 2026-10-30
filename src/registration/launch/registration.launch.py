@@ -7,7 +7,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     pkg_share = get_package_share_directory('registration')
     config = os.path.join(pkg_share, 'config', 'registration_params.yaml')
-    stl_path = os.path.join(pkg_share, 'mesh', 'field.stl')
+    pcd_path = os.path.join(pkg_share, 'mesh', 'target.pcd')
 
     icp_node = Node(
         package = 'registration',
@@ -16,7 +16,7 @@ def generate_launch_description():
         output = 'screen',
         parameters=[
             config,
-            {'stl_file': stl_path},
+            {'target_file': pcd_path},
         ],
     )
 

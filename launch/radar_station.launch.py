@@ -35,7 +35,7 @@ def generate_launch_description():
     preprocess_config = os.path.join(preprocess_share, 'config', 'preprocess_params.yaml')
     segment_config = os.path.join(segment_share, 'config', 'segment_params.yaml')
     registration_config = os.path.join(registration_share, 'config', 'registration_params.yaml')
-    registration_stl = os.path.join(registration_share, 'mesh', 'field.stl')
+    registration_pcd = os.path.join(registration_share, 'mesh', 'target.pcd')
 
     rviz_raw_config = os.path.join(preprocess_share, 'config', 'roi_raw.rviz')
     rviz_cropped_config = os.path.join(preprocess_share, 'config', 'roi_cropped.rviz')
@@ -98,7 +98,7 @@ def generate_launch_description():
         package  = 'registration', executable = 'icp_node',
         name = "icp",
         output = 'screen',
-        parameters = [registration_config, {'stl_file': registration_stl}],
+        parameters = [registration_config, {'stl_file': registration_pcd}],
     )
 
     # ---- 4) RViz2 窗口(每个用各自的开关参数控制)----

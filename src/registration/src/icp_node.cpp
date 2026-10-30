@@ -8,7 +8,7 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/io/vtk_lib_io.h>
+#include <pcl/io/pcd_io.h>
 #include <pcl/registration/icp.h>
 #include <pcl/common/transforms.h>
 #include <pcl/filters/voxel_grid.h>
@@ -32,7 +32,7 @@ public:
     // 加载STL文件
     // loadTarget(stl_file_);
     // 加载PCD文件
-    loadPCDFile(target_file_);
+    loadTarget(target_file_);
 
     // 初始化上一帧为单位矩阵
     prev_transform_ = Eigen::Matrix4f::Identity();
@@ -59,6 +59,17 @@ public:
 
     //   RCLCPP_INFO(this->get_logger(), "STL 加载完成： %zu 个顶点", target_cloud_->size());
     // }
+
+    void loadTarget(const std::string & path){
+      target_cloud_.reset(new pcl::PointCloud<pcl::PointXYZ>());
+
+      if (pcl::io::loadPCDFile<pcl::PointXYZ>(path, *target_cloud_) < 0){
+        RCLCPP_ERROR(this->get_logger(), "PCD 文件加载失败: %s", path.c_str());
+        return;
+      }
+
+      RCLCPP_INFO(this->get_logger(), "参考点云加载完成: %zu 个点", target_cloud_->size());
+    }
 
     void cloudCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr msg){
       pcl::PointCloud<pcl::PointXYZI>::Ptr source_xyzi(new pcl::PointCloud<pcl::PointXYZI>());
@@ -99,7 +110,7 @@ public:
       pub_->publish(out);
     }
 
-    std::string input_topic_, output_topic_, stl_file_;
+    std::string input_topic_, output_topic_, target_file_;
     int max_iterations_;
     double max_correspondence_distance_;
 
