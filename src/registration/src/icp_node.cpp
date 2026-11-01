@@ -25,7 +25,11 @@ public:
     input_topic_ = this->declare_parameter<std::string>("input_topic", "/livox/lidar");
     output_topic_ = this->declare_parameter<std::string>("output_topic", "/registration/icp");
     // stl_file_ = this->declare_parameter<std::string>("stl_file", "");
+<<<<<<< HEAD
     target_file_ = this->declare_parameter<std::string>("target_file", "");
+=======
+    target_file_ = this->declare_parameter<std::string>("target_file", "mesh/target.pcd");
+>>>>>>> d667aba (new pcd: desk_south.pcd)
 
     max_iterations_ = this->declare_parameter<int>("max_iterations", 50);
     max_correspondence_distance_ = this->declare_parameter<double>("max_correspondence_distance", 0.5);

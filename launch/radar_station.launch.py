@@ -35,7 +35,9 @@ def generate_launch_description():
     preprocess_config = os.path.join(preprocess_share, 'config', 'preprocess_params.yaml')
     segment_config = os.path.join(segment_share, 'config', 'segment_params.yaml')
     registration_config = os.path.join(registration_share, 'config', 'registration_params.yaml')
-    registration_pcd = os.path.join(registration_share, 'mesh', 'target.pcd')
+    # registration_pcd = os.path.join(registration_share, 'mesh', 'target.pcd')
+    registration_pcd = os.path.join(registration_share, 'mesh', 'desk_south.pcd')
+
 
     rviz_raw_config = os.path.join(preprocess_share, 'config', 'roi_raw.rviz')
     rviz_cropped_config = os.path.join(preprocess_share, 'config', 'roi_cropped.rviz')

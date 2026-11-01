@@ -7,7 +7,8 @@ from launch_ros.actions import Node
 def generate_launch_description():
     pkg_share = get_package_share_directory('registration')
     config = os.path.join(pkg_share, 'config', 'registration_params.yaml')
-    pcd_path = os.path.join(pkg_share, 'mesh', 'target.pcd')
+    # pcd_path = os.path.join(pkg_share, 'mesh', 'target.pcd')
+    pcd_path = os.path.join(pkg_share, 'mesh', 'desk_south.pcd')
 
     icp_node = Node(
         package = 'registration',
