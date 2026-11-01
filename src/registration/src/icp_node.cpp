@@ -21,10 +21,11 @@ public:
   : Node("icp")
   {
     // 声明参数
-    input_topic_ = this->declare_parameter<std::string>("input_topic", "/preprocess/valid");
+    // input_topic_ = this->declare_parameter<std::string>("input_topic", "/preprocess/valid");
+    input_topic_ = this->declare_parameter<std::string>("input_topic", "/livox/lidar");
     output_topic_ = this->declare_parameter<std::string>("output_topic", "/registration/icp");
     // stl_file_ = this->declare_parameter<std::string>("stl_file", "");
-    target_file_ = this->declare_parameter<std::string>("target", "");
+    target_file_ = this->declare_parameter<std::string>("target_file", "");
 
     max_iterations_ = this->declare_parameter<int>("max_iterations", 50);
     max_correspondence_distance_ = this->declare_parameter<double>("max_correspondence_distance", 0.5);
@@ -33,6 +34,11 @@ public:
     // loadTarget(stl_file_);
     // 加载PCD文件
     loadTarget(target_file_);
+
+    if (!target_cloud_ || target_cloud_ -> empty()){
+      RCLCPP_ERROR(this->get_logger(), "参考点云为空，节点无法工作！请检查 target_file 参数");
+      throw std::runtime_error("target cloud is empty");
+    }
 
     // 初始化上一帧为单位矩阵
     prev_transform_ = Eigen::Matrix4f::Identity();
@@ -94,12 +100,10 @@ public:
         return;
       }
 
-      if (icp.hasConverged()){
-        printf("it has been converged.");
-        return;
-      }
-
       prev_transform_ = icp.getFinalTransformation();
+      double score = icp.getFitnessScore();
+
+      RCLCPP_INFO(this->get_logger(), "ICP 收敛 | fitness_score=%.6f", score);
 
       pcl::PointCloud<pcl::PointXYZI> transformed;
       pcl::transformPointCloud(*source_xyzi, transformed, prev_transform_);
