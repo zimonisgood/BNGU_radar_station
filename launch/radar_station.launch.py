@@ -43,6 +43,7 @@ def generate_launch_description():
     rviz_cropped_config = os.path.join(preprocess_share, 'config', 'roi_cropped.rviz')
     rviz_filtered_config = os.path.join(preprocess_share, 'config', 'roi_filtered.rviz')
     rviz_clusters_config = os.path.join(segment_share, 'config', 'clusters.rviz')
+    rviz_icp_config = os.path.join(registration_share, 'config', 'rviz_icp.rviz')
 
     # ---- 每个 RViz 窗口一个独立开关 ----
     rviz_args = [
@@ -54,6 +55,8 @@ def generate_launch_description():
                               description='RViz 窗口:预处理输出 /preprocess/output'),
         DeclareLaunchArgument('rviz_clusters', default_value='true',
                               description='RViz 窗口:欧式聚类 /segment/clusters'),
+        DeclareLaunchArgument('rviz_icp', default_value='true',
+                              description='RViz 窗口:ICP /registration/icp'),
     ]
 
     # ---- 1) Livox MID-70 驱动(xfer_format=0 -> /livox/lidar 发布 PointCloud2)----
@@ -100,7 +103,10 @@ def generate_launch_description():
         package  = 'registration', executable = 'icp_node',
         name = "icp",
         output = 'screen',
-        parameters = [registration_config, {'stl_file': registration_pcd}],
+        parameters = [
+            registration_config,
+            {'target_file': registration_pcd},
+        ],
     )
 
     # ---- 4) RViz2 窗口(每个用各自的开关参数控制)----
@@ -124,6 +130,11 @@ def generate_launch_description():
         arguments=['-d', rviz_clusters_config], output='screen',
         condition=IfCondition(LaunchConfiguration('rviz_clusters')),
     )
+    rviz_icp = Node(
+        package='rviz2', executable='rviz2', name='rviz2_icp',
+        arguments=['-d', rviz_icp_config], output='screen',
+        condition=IfCondition(LaunchConfiguration('rviz_icp')),
+    )
 
     return LaunchDescription([
         *rviz_args,
@@ -138,4 +149,5 @@ def generate_launch_description():
         rviz_roi,
         rviz_output,
         rviz_clusters,
+        rviz_icp,
     ])

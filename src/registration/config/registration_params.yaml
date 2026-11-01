@@ -2,8 +2,16 @@ icp:
   ros__parameters:
     input_topic: "/preprocess/valid"
     output_topic: "/registration/icp"
-    # target_file: "/mesh/target.pcd"
-    target_file: "/mesh/desk_south.pcd"
+    target_topic: "/registration/target"
+    # target_file 必须是绝对路径,由 launch 根据功能包 share 目录拼接后传入并覆盖此处
+    target_file: ""
 
     max_iterations: 50
     max_correspondence_distance: 0.5
+
+    # 体素降采样边长(米),<=0 表示不降采样
+    target_leaf_size: 0.1
+    source_leaf_size: 0.1
+
+    # fitness_score(对应点平均平方距离)超过该值视为配准失败,不更新位姿
+    fitness_threshold: 0.05
