@@ -16,14 +16,16 @@ def generate_launch_description():
         ros2 launch launch/radar_station.launch.py
     这样读取的始终是源文件本身,无需 colcon build / install 同步。
 
-    一次性拉起:Livox 驱动 + preprocess 预处理 + segment 分割 + RViz2(全链路)。
+    一次性拉起:Livox 驱动 + preprocess 预处理 + registration 配准/背景过滤 + segment 分割 + RViz2(全链路)。
 
     数据流:
       /livox/lidar
-        -> roi_filter          (ROI 立方体裁剪)      -> /preprocess/roi
-        -> invalid_removal     (去除 NaN/Inf 无效点) -> /preprocess/valid
-        -> statistical_outlier (统计离群点去除)       -> /preprocess/output
-        -> euclidean_cluster   (欧式聚类)            -> /segment/clusters
+        -> roi_filter          (ROI 立方体裁剪)        -> /preprocess/roi
+        -> invalid_removal     (去除 NaN/Inf 无效点)   -> /preprocess/valid
+        -> icp                 (ICP 配准到参考点云)    -> /registration/icp
+        -> background_filter   (先验占据栅格去背景)    -> /registration/foreground (+ /registration/background 调试)
+        -> statistical_outlier (统计离群点去除)         -> /preprocess/output
+        -> euclidean_cluster   (欧式聚类)              -> /segment/clusters
 
     每个 RViz 窗口都有独立的开关参数,临时隐藏某个窗口时在命令行传 `xxx:=false`
     即可,无需改动本文件(例如: `rviz_clusters:=false`)。
@@ -44,6 +46,7 @@ def generate_launch_description():
     rviz_filtered_config = os.path.join(preprocess_share, 'config', 'roi_filtered.rviz')
     rviz_clusters_config = os.path.join(segment_share, 'config', 'clusters.rviz')
     rviz_icp_config = os.path.join(registration_share, 'config', 'rviz_icp.rviz')
+    rviz_foreground_config = os.path.join(registration_share, 'config', 'rviz_foreground.rviz')
 
     # ---- 每个 RViz 窗口一个独立开关 ----
     rviz_args = [
@@ -57,6 +60,8 @@ def generate_launch_description():
                               description='RViz 窗口:欧式聚类 /segment/clusters'),
         DeclareLaunchArgument('rviz_icp', default_value='true',
                               description='RViz 窗口:ICP /registration/icp'),
+        DeclareLaunchArgument('rviz_foreground', default_value='true',
+                              description='RViz 窗口:背景过滤 /registration/foreground + /registration/background'),
     ]
 
     # ---- 1) Livox MID-70 驱动(xfer_format=0 -> /livox/lidar 发布 PointCloud2)----
@@ -99,6 +104,7 @@ def generate_launch_description():
         output='screen', parameters=[segment_config],
     )
 
+    # ---- 3.5) registration 配准 + 背景过滤(输入 /preprocess/valid,输出 /registration/foreground)----
     icp_node = Node(
         package  = 'registration', executable = 'icp_node',
         name = "icp",
@@ -106,6 +112,16 @@ def generate_launch_description():
         parameters = [
             registration_config,
             {'target_file': registration_pcd},
+        ],
+    )
+    # 先验占据栅格与 ICP 共用同一份 PCD,保证坐标系一致
+    background_filter_node = Node(
+        package  = 'registration', executable = 'background_filter_node',
+        name = "background_filter",
+        output = 'screen',
+        parameters = [
+            registration_config,
+            {'prior_file': registration_pcd},
         ],
     )
 
@@ -135,6 +151,11 @@ def generate_launch_description():
         arguments=['-d', rviz_icp_config], output='screen',
         condition=IfCondition(LaunchConfiguration('rviz_icp')),
     )
+    rviz_foreground = Node(
+        package='rviz2', executable='rviz2', name='rviz2_foreground',
+        arguments=['-d', rviz_foreground_config], output='screen',
+        condition=IfCondition(LaunchConfiguration('rviz_foreground')),
+    )
 
     return LaunchDescription([
         *rviz_args,
@@ -145,9 +166,11 @@ def generate_launch_description():
         statistical_outlier_node,
         euclidean_cluster_node,
         icp_node,
+        background_filter_node,
         rviz_raw,
         rviz_roi,
         rviz_output,
         rviz_clusters,
         rviz_icp,
+        rviz_foreground,
     ])

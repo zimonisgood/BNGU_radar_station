@@ -15,3 +15,22 @@ icp:
 
     # fitness_score(对应点平均平方距离)超过该值视为配准失败,不更新位姿
     fitness_threshold: 0.05
+
+# 先验占据栅格背景过滤
+# 数据流: /registration/icp -> background_filter -> /registration/foreground (+ /registration/background 调试)
+background_filter:
+  ros__parameters:
+    input_topic: "/registration/icp"
+    foreground_topic: "/registration/foreground"
+    background_topic: "/registration/background"
+    # 先验背景 PCD,必须与 ICP 的 target_file 是同一坐标系(默认由 launch 传入同一文件)
+    prior_file: ""
+
+    # 体素边长(米)。越小越精细,但对 ICP 残差越敏感
+    voxel_size: 0.1
+    # 膨胀格数:占据体素向外扩 N 格,用于吸收 ICP 残差与测距噪声(容差 ≈ N * voxel_size)
+    dilation: 1
+    # 先验点云中一个体素至少要有多少个点才算占据,>1 可剔除建图时的零星飞点
+    min_points_per_voxel: 1
+    # 是否发布背景点云(仅 RViz 调试用,正式运行可关闭节省带宽)
+    publish_background: true

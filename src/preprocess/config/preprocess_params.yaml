@@ -1,5 +1,7 @@
 # 点云预处理流水线参数(多节点)
-# 数据流: /livox/lidar -> roi_filter -> invalid_removal -> statistical_outlier -> /preprocess/output
+# 数据流: /livox/lidar -> roi_filter -> invalid_removal -> /preprocess/valid
+#         -> (registration: icp -> background_filter) -> /registration/foreground
+#         -> statistical_outlier -> /preprocess/output
 
 # 1) ROI 立方体裁剪
 roi_filter:
@@ -25,9 +27,10 @@ invalid_removal:
     output_topic: "/preprocess/valid"
 
 # 3) 统计离群点去除(去噪/飞点)
+#    串联在背景过滤之后:只对少量前景点做离群剔除,更快也更准
 statistical_outlier:
   ros__parameters:
-    input_topic: "/preprocess/valid"
+    input_topic: "/registration/foreground"
     output_topic: "/preprocess/output"
 
     mean_k: 20             # 估计平均距离所用的邻居点个数

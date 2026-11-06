@@ -57,6 +57,12 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
     pcl::fromROSMsg(*msg, *cloud);
 
+    // 背景过滤后前景可能为空帧:KdTree 无法处理空点云,直接透传空帧
+    if (cloud->empty()) {
+      pub_->publish(*msg);
+      return;
+    }
+
     pcl::PointCloud<pcl::PointXYZI> filtered;
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> sor;
     sor.setInputCloud(cloud);

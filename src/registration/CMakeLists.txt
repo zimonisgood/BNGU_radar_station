@@ -25,17 +25,25 @@ find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common io filters registration)
 
-add_executable(icp_node src/icp_node.cpp)
-target_include_directories(icp_node SYSTEM PRIVATE ${PCL_INCLUDE_DIRS})
-target_compile_options(icp_node PRIVATE ${PCL_DEFINITIONS})
-target_link_libraries(icp_node ${PCL_LIBRARIES})
-ament_target_dependencies(icp_node
-    rclcpp
-    sensor_msgs
-    pcl_conversions
+# 配准流水线各节点(每个功能一个独立可执行文件)
+set(registration_nodes
+    icp_node                # ICP 配准到静态参考点云
+    background_filter_node  # 先验占据栅格背景过滤
 )
 
-install(TARGETS icp_node
+foreach(node ${registration_nodes})
+    add_executable(${node} src/${node}.cpp)
+    target_include_directories(${node} SYSTEM PRIVATE ${PCL_INCLUDE_DIRS})
+    target_compile_options(${node} PRIVATE ${PCL_DEFINITIONS})
+    target_link_libraries(${node} ${PCL_LIBRARIES})
+    ament_target_dependencies(${node}
+        rclcpp
+        sensor_msgs
+        pcl_conversions
+    )
+endforeach()
+
+install(TARGETS ${registration_nodes}
     DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch config mesh
