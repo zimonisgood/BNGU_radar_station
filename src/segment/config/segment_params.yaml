@@ -11,3 +11,5 @@ euclidean_cluster:
     cluster_tolerance: 1.0     # 空间距离阈值(米):超过则一定不同类
     min_cluster_size: 0        # 聚类最小点数,低于此视为噪声丢弃
     max_cluster_size: 25000    # 聚类最大点数,高于此视为背景丢弃
+
+    log_cluster_centers: true   # 每帧在终端打印每个簇的质心(调试用,生产可设 false)

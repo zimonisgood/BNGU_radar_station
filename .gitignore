@@ -4,3 +4,6 @@ install/
 log/
 __pycache__/
 *.pyc
+
+# scripts/record_pcd.py 默认输出目录
+pcd_recordings/
