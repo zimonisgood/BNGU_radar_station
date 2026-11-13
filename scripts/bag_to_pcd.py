@@ -17,6 +17,7 @@ bag_to_pcd.py — 读取 ROS 2 bag 里的 PointCloud2，把所有帧合并成一
   - --keep-extra 额外保存 tag/line；
   - --no-intensity 只保存 x y z；
   - 默认输出 pcd_recordings/<bag名>_merged.pcd。
+  - 省略 bag 参数时，如果 bags/ 下只有一个候选，会自动使用它。
 """
 
 import argparse
@@ -42,12 +43,40 @@ def read_storage_id(bag_path: Path, fallback: str) -> str:
     return info.get("storage_identifier", fallback)
 
 
+def find_default_bag(script_dir: Path) -> Path:
+    """未指定 bag 时，在 workspace 的 bags/ 下找一个 bag。
+
+    优先顺序: 只有一个候选 -> 直接用它；多个候选 -> 报错列出，让用户明确指定。
+    """
+    ws_dir = script_dir.parent
+    bags_dir = ws_dir / "bags"
+    candidates = []
+    if bags_dir.is_dir():
+        for child in sorted(bags_dir.iterdir()):
+            if not child.is_dir():
+                continue
+            if (child / "metadata.yaml").exists() or any(child.glob("*.mcap")):
+                candidates.append(child)
+    if not candidates:
+        raise SystemExit(
+            f"未指定 bag，且在 {bags_dir} 下没有找到可用的 bag。\n"
+            "用法: ./scripts/bag_to_pcd.sh bags/<bag名>"
+        )
+    if len(candidates) > 1:
+        names = "\n".join(f"  {c}" for c in candidates)
+        raise SystemExit(
+            "未指定 bag，且找到多个候选，请明确指定：\n" + names
+        )
+    return candidates[0]
+
+
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         description="读取 ROS 2 bag 中的 PointCloud2，合并成一个 PCD",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("bag", help="bag 目录，例如 bags/empty_scene")
+    parser.add_argument("bag", nargs="?", default=None,
+                        help="bag 目录，例如 bags/empty_scene")
     parser.add_argument("-o", "--output", default=None,
                         help="输出 PCD；默认 pcd_recordings/<bag名>_merged.pcd")
     parser.add_argument("--topic", default="/livox/lidar",
@@ -73,7 +102,11 @@ def parse_args(argv=None):
 
 def main(argv=None):
     args = parse_args(argv)
-    bag_path = Path(args.bag).expanduser().resolve()
+    if args.bag:
+        bag_path = Path(args.bag).expanduser().resolve()
+    else:
+        bag_path = find_default_bag(Path(__file__).resolve().parent).resolve()
+        print(f"未指定 bag，自动使用: {bag_path}")
     if not bag_path.is_dir():
         print(f"bag 目录不存在: {bag_path}", file=sys.stderr)
         return 1
