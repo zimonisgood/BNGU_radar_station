@@ -1,0 +1,25 @@
+# record_pcd.py 配置：机器人运动正样本
+#
+# 用法:
+#   ./scripts/record_pcd.sh --config scripts/record_robot.yaml
+#
+# 每录一条轨迹，建议把 output_dir 改成 robot_moving_01、robot_moving_02...
+
+topic: /livox/lidar
+output_dir: pcd_recordings/robot_moving
+
+# frames 适合逐帧分析；要看整体点云可改 merged 或 both
+mode: merged
+
+# 每条轨迹 20 秒左右；不同距离/速度各录一条
+duration: 20.0
+max_frames: 0
+min_interval: 0.0
+
+qos: reliable
+keep_nans: false
+keep_extra: false
+ascii: false
+no_intensity: false
+merged_name: merged.pcd
+node_name: pcd_recorder

@@ -3,22 +3,18 @@
 """
 record_pcd.py — 订阅 ROS 2 的 PointCloud2，按帧保存为 PCD，并可合并成一个 PCD。
 
-典型用法（先 source ROS 和工作空间）:
-  source /opt/ros/jazzy/setup.bash
-  source install/setup.bash
+推荐用法（wrapper 会自动 source ROS 和工作空间）:
+  ./scripts/record_pcd.sh
+  ./scripts/record_pcd.sh --config scripts/record_robot.yaml
+  ./scripts/record_pcd.sh --duration 10 --mode merged
 
-  # 录 30 秒，同时保存每帧 PCD + 合并 PCD
-  /usr/bin/python3 scripts/record_pcd.py \
-      --topic /livox/lidar \
-      --duration 30 \
-      --mode both \
-      --output-dir pcd_recordings/empty_scene
+直接调用 Python（必须用系统 Python，避免 conda 覆盖 ROS 的 Python）:
+  /usr/bin/python3 scripts/record_pcd.py --config scripts/record_pcd.yaml
 
-  # 只保存合并后的一个 PCD（适合做先验/快速查看）
-  /usr/bin/python3 scripts/record_pcd.py --mode merged --duration 30
-
-  # 录到手动 Ctrl+C 为止
-  /usr/bin/python3 scripts/record_pcd.py --max-frames 0 --duration 0
+配置文件:
+  默认读取脚本同目录的 record_pcd.yaml；
+  --config 可指定其他 YAML；
+  命令行参数优先级高于配置文件。
 
 输出:
   <output-dir>/
@@ -45,6 +41,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+import yaml
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
@@ -322,6 +319,7 @@ class PcdRecorder(Node):
             self.get_logger().warn("没有收到任何点云，未写出 merged.pcd")
 
         metadata = {
+            "config_file": getattr(self.args, "config_used", None),
             "topic": self.args.topic,
             "qos": self.args.qos,
             "mode": self.args.mode,
@@ -358,11 +356,63 @@ def default_output_dir():
     return f"pcd_recordings/{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
 
+DEFAULT_CONFIG_PATH = Path(__file__).with_name("record_pcd.yaml")
+CONFIG_KEYS = {
+    "topic", "output_dir", "mode", "max_frames", "duration",
+    "min_interval", "qos", "keep_nans", "keep_extra", "ascii",
+    "no_intensity", "merged_name", "node_name",
+}
+
+
+def load_config(path: Path) -> dict:
+    if not path.exists():
+        raise FileNotFoundError(f"配置文件不存在: {path}")
+    with path.open("r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    if not isinstance(data, dict):
+        raise ValueError(f"配置文件必须是 YAML 字典: {path}")
+    unknown = set(data) - CONFIG_KEYS
+    if unknown:
+        raise ValueError(f"配置文件包含未知字段: {sorted(unknown)}")
+
+    # YAML 里可能写成字符串，这里统一转成脚本期望的类型
+    if "duration" in data:
+        data["duration"] = float(data["duration"])
+    if "min_interval" in data:
+        data["min_interval"] = float(data["min_interval"])
+    if "max_frames" in data:
+        data["max_frames"] = int(data["max_frames"])
+    for key in ("keep_nans", "keep_extra", "ascii", "no_intensity"):
+        if key in data:
+            data[key] = bool(data[key])
+    return data
+
+
 def parse_args(argv=None):
+    # 先单独解析 --config，读取 YAML，再用它作为 argparse 的默认值
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument("--config", default=None)
+    pre_args, _ = pre_parser.parse_known_args(argv)
+
+    if pre_args.config:
+        config_path = Path(pre_args.config).expanduser()
+    elif DEFAULT_CONFIG_PATH.exists():
+        config_path = DEFAULT_CONFIG_PATH
+    else:
+        config_path = None
+
+    try:
+        config = load_config(config_path) if config_path else {}
+    except Exception as exc:  # noqa: BLE001
+        pre_parser.error(f"读取配置文件失败: {exc}")
+
     parser = argparse.ArgumentParser(
         description="订阅 ROS 2 PointCloud2，保存为 PCD（支持逐帧和合并）",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument(
+        "--config", default=str(config_path) if config_path else None,
+        help="YAML 配置文件；默认读取脚本同目录的 record_pcd.yaml")
     parser.add_argument("--topic", default="/livox/lidar",
                         help="PointCloud2 话题")
     parser.add_argument("-o", "--output-dir", default=None,
@@ -391,9 +441,18 @@ def parse_args(argv=None):
                         help="合并 PCD 的文件名")
     parser.add_argument("--node-name", default="pcd_recorder",
                         help="ROS 节点名")
+
+    # 配置文件作为默认值；命令行参数会覆盖它
+    parser.set_defaults(**config)
     args = parser.parse_args(argv)
+    args.config_used = args.config
+
     if args.output_dir is None:
         args.output_dir = default_output_dir()
+    if args.mode not in ("frames", "merged", "both"):
+        parser.error(f"--mode 只能是 frames/merged/both，当前: {args.mode}")
+    if args.qos not in ("reliable", "sensor"):
+        parser.error(f"--qos 只能是 reliable/sensor，当前: {args.qos}")
     if args.max_frames < 0:
         parser.error("--max-frames 不能为负数")
     if args.duration < 0:
@@ -405,6 +464,8 @@ def parse_args(argv=None):
 
 def main(argv=None):
     args = parse_args(argv)
+    if getattr(args, "config_used", None):
+        print(f"使用配置文件: {args.config_used}")
 
     # 这个环境里 conda 的 Python 可能覆盖 ROS 2 的 Python；给出明确提示
     if "miniconda" in sys.executable or "conda" in sys.executable:

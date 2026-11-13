@@ -1,0 +1,35 @@
+# record_pcd.py 的默认配置：空场景（用于建背景先验）
+#
+# 用法:
+#   ./scripts/record_pcd.sh
+#   ./scripts/record_pcd.sh --config scripts/record_robot.yaml
+#
+# 命令行参数会覆盖这里配置，例如:
+#   ./scripts/record_pcd.sh --duration 10 --mode merged
+
+topic: /livox/lidar
+
+# 每次录制前建议改成不同的目录，或先清空旧目录
+output_dir: pcd_recordings/empty_scene
+
+# frames=每帧一个 PCD（推荐做逐帧投票先验）
+# merged=最后合并成一个 PCD（适合快速查看）
+# both=两者都保存（磁盘占用约 2 倍）
+mode: merged
+
+# 15 秒 = 约 150 帧；静态场景做背景先验足够
+duration: 15.0
+
+# 0 表示不限制；也可以用它代替 duration
+max_frames: 0
+
+# 两帧之间至少间隔多少秒；0=每帧都存
+min_interval: 0.0
+
+qos: reliable
+keep_nans: false
+keep_extra: false
+ascii: false
+no_intensity: false
+merged_name: merged.pcd
+node_name: pcd_recorder
