@@ -1,0 +1,17 @@
+# record_bag.py 配置：机器人运动正样本
+#
+# 用法:
+#   ./scripts/record_bag.sh --config scripts/record_bag_robot.yaml
+#
+# 每录一条轨迹，建议把 output_dir 改成 bags/robot_moving_01、02...
+
+topic: /livox/lidar
+output_dir: bags/robot_moving
+
+# 每条轨迹 20 秒左右
+duration: 20.0
+
+storage: mcap
+compression_mode: none
+compression_format: zstd
+node_name: livox_bag_recorder

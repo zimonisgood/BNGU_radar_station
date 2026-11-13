@@ -3,6 +3,12 @@
 """
 record_pcd.py — 订阅 ROS 2 的 PointCloud2，按帧保存为 PCD，并可合并成一个 PCD。
 
+注意:
+  本脚本是“实时话题直接写 PCD”，不经过 bag。
+  如果你想“先录 bag，再转 PCD”，请使用:
+      ./scripts/record_bag.sh
+      ./scripts/bag_to_pcd.sh bags/empty_scene -o pcd_recordings/empty_scene_merged.pcd
+
 推荐用法（wrapper 会自动 source ROS 和工作空间）:
   ./scripts/record_pcd.sh
   ./scripts/record_pcd.sh --config scripts/record_robot.yaml

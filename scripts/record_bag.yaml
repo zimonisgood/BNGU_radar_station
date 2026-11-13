@@ -1,0 +1,25 @@
+# record_bag.py 的默认配置：空场景（用于建背景先验）
+#
+# 用法:
+#   ./scripts/record_bag.sh
+#   ./scripts/record_bag.sh --config scripts/record_bag_robot.yaml
+#
+# 录完之后:
+#   ./scripts/bag_to_pcd.sh bags/empty_scene \
+#       -o pcd_recordings/empty_scene_merged.pcd
+
+topic: /livox/lidar
+
+# 每次录制前改成不同目录；目录必须不存在
+output_dir: bags/empty_scene
+
+# 15 秒约 150 帧，静态背景足够；0 表示 Ctrl+C 结束
+duration: 15.0
+
+storage: mcap
+
+# none=不压缩；file/message 可选，format 目前只支持 zstd
+compression_mode: none
+compression_format: zstd
+
+node_name: livox_bag_recorder
